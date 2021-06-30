@@ -211,5 +211,5 @@ function Derivative(block)
     block.Dwork(1).Data = dxdt1;
     
     % Compute the derivative vector dx/dt:
-    block.Derivatives.Data = [dxdt1;dxdt2]; %;dxdt3];
+    block.Derivatives.Data = double([dxdt1;dxdt2]); %;dxdt3];
 end
