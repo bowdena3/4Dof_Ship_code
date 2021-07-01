@@ -1,4 +1,4 @@
-% ship4dofSim.m     e.anderlini@ucl.ac.uk     07/05/2019
+% ship4dofSim.m     mail     30/06/2021
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This script simulates the dynamics of a roro ship in 4 degrees of 
 % freedom under simple PID control.
@@ -66,9 +66,9 @@ t = sout.tout;
 x = sout.get('logsout').getElement('states').Values.Data;
 v = sout.get('logsout').getElement('velocity').Values.Data;
 u = sout.get('logsout').getElement('input').Values.Data;
-p = sout.get('logsout').getElement('angle').Values.Data;
+% p = sout.get('logsout').getElement('angle').Values.Data;
 
 % Plot the AUV's motions:
 plotMotions(t,x(:,1:3),v);
 % Plot the AUV's control input:
-plotControl(t,u(:,1),rad2deg(u(:,2)),x(:,7));
+% plotControl(t,u(:,1),rad2deg(u(:,2)),x(:,7));

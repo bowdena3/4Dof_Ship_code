@@ -1,5 +1,5 @@
 function ship_4dof(block)
-% remus_dynamics.m     e.anderlini@ucl.ac.uk     07/05/2019
+% remus_dynamics.m     mail     30/06/2021
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This is a Level-2 Matlab S-function for the modelling of the dynamics of
 % an ship in 4 DOF.
@@ -198,8 +198,8 @@ function Derivative(block)
     % 4dof equation of motion
 %     control = [thrust;0;0;delta*rudder_coefficient*u2]; % ???? [surge,sway,roll,yaw]
     
-%     f = Crb*nu+Ca*nu+D*nu+G*eta + control;  % check sign f=control-...
-    f = Crb*nu+Ca*nu+D*nu+G*eta;
+%     f = -Crb*nu-Ca*nu-D*nu-G*eta + control;  % check sign f=control-...
+    f = -Crb*nu-Ca*nu-D*nu-G*eta;
     dxdt2 = Minv*f;
     
     % Compute the right-hand side of the propulsion vector:

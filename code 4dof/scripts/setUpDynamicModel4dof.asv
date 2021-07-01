@@ -34,8 +34,8 @@ rho = 1000;
 Lpp = 230.66;
 Unom = 12.7;
 ine.m = m_non*(2/(rho*Lpp^3));         % [kg]            % Mass of vehicle
-ine.xg = -0.46e-5;                     % [m]             % z-coordinate of vehicle centre of gravity
-ine.zg = -3.54e-5;                     % [m]             % z-coordinate of vehicle centre of gravity
+ine.xg = -0.46e-5;          % [m]           % z-coordinate of vehicle centre of gravity
+ine.zg = -3.54e-5;              % [m]           % z-coordinate of vehicle centre of gravity
 ine.Ixx = Ixx_non*(2/(rho*Lpp^5));     % [kg m2]         % Inertia around axiss
 ine.Izz = Izz_non*(2/(rho*Lpp^5));     % [kg m2]         % Inertia around axiss
 
