@@ -196,15 +196,8 @@ function Derivative(block)
     eta = [0, 0, phi, psi]';            %% should be eta = [x, y, phi, psi]';
     nu =  [u, v, p, r]';
     % 4dof equation of motion
-    
-%     xdata = ;
-%     ydata =  ;
-%     x_input = ;     % an example value
-%     y_output = interp1(xdata,ydata,x_input);
-%     disp(y_output)
-    
-%     control = [thrust;0;0;delta*rudder_coefficient*u2]; % ???? [surge,sway,roll,yaw]
-    control = [10000;0;0;0]; %[test]
+    control = [10000;0;0;0]; %[thrust;0;0;delta*rudder_coefficient*u2]; % ???? [surge,sway,roll,yaw]
+    control = [10000;0;0;0]; %[test
     
     f = -Crb*nu-Ca*nu-D*nu-G*eta + control;  % check sign f=control-...
     dxdt2 = Minv*f;
