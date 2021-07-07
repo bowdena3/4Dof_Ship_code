@@ -18,7 +18,8 @@ function setup(block)
     block.SetPreCompOutPortInfoToDynamic;
     
     % Size the input ports correctly:
-    block.InputPort(1).Dimensions    = 2;    % control input vector (thrust, rudder angle)
+%     block.InputPort(1).Dimensions    = 2;    % control input vector (thrust, rudder angle)
+    block.InputPort(1).Dimensions    = 3;    % control input vector (Wind speed, wind angle, rudder angle)
     % Specify whether there is direct feedthrough:
     block.InputPort(1).DirectFeedthrough = false;
     block.InputPort(1).SamplingMode  = 'Sample';
@@ -108,8 +109,10 @@ function Derivative(block)
     
     % To make the code clearer, copy all desired parameters and states:
     % Input vector:
-    thrust = in(1);      % thrust [N]
-    delta  = in(2);      % rudder angle [rad]
+%     thrust = in(1);      % thrust [N]
+    Vt = in(1);      % thrust [m/s]
+    Vtheta = in(2);      % thrust [degrees]
+    delta  = in(3);      % rudder angle [rad]
     
     % State vector:
     phi   = x(3);
@@ -195,16 +198,32 @@ function Derivative(block)
         0, -Nvrr*r2-Nv_v*abs_v-Nv_r*abs_r, 0, -Nrrr*r2-Nrvv*v2-Nv_r*abs_v-Nr_r*abs_r];
     eta = [0, 0, phi, psi]';            %% should be eta = [x, y, phi, psi]';
     nu =  [u, v, p, r]';
-    % 4dof equation of motion
-    control = [10000;0;0;0]; %[thrust;0;0;delta*rudder_coefficient*u2]; % ???? [surge,sway,roll,yaw]
-    control = [10000;0;0;0]; %[test
     
+    
+    % Contol calculation % example Bow 2 sail output lift - move out of equations of motion
+    % Apparant and acutal wind 
+    Va = sqrt(u^2+Vt^2-2*u*Vt*cos(180-Vtheta));        % to check - should u be u2 + v2? - may update equation Vtheta?
+    Beta = (Vt/Va)*(180-Vtheta);
+    
+    xdata = [20.0,30.0,34.7,44.8,60.0,74.8,90.0,104.8,119.8,135.0,150.0,165.1,180.1];
+    ydata = [0.9818,1.1957,1.2599,1.3369,1.4011,1.4182,1.4310,1.4267,1.3754,0.6995,0.4770,-0.0021,0.0021];
+    x_input = Beta;     % Angle
+    y_output = interp1(xdata,ydata,x_input);    %coeffent lift
+    rho = 1.225;
+    area = 1;   
+    thr = 0.5*y_output*rho*area*Va^2;  % lift
+    
+    
+    rudder_coefficient = 0;         % move to setUpDynamic 
+    control = [thrust;0;0;delta*rudder_coefficient*u2];  % [surge,sway,roll,yaw]
+    
+    % 4dof equation of motion
     f = -Crb*nu-Ca*nu-D*nu-G*eta + control;  % check sign f=control-...
     dxdt2 = Minv*f;
     
     % Compute the right-hand side of the propulsion vector:
     % [dn/dt;du_p/dt] = f3(t);  %%
-%     dxdt3 = [(Q-Kn*n-Qnn*n_n)/Jm;...                                % will change - (just equation got propultion thrust?)?
+%     dxdt3 = [(Q-Kn*n-Qnn*n_n)/Jm;...                                
 %         (Tnn*n_n-CDl*up-CDq*abs(up)*(u-(1-wp)*u))/mf];
     
     % Store the inertial velocity as a work vector:
