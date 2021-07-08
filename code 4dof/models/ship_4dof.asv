@@ -211,13 +211,15 @@ function Derivative(block)
     AOA = 20;       % example sail angle of attack - local (oriantated to apparent wind angle)
     Cl_angle = [0.2,5.6,6.8,8.0,10.5,12.6,15.0,17.5,25.7,30.2,40.2,50.3,59.7,69.2,79.9,90.3,99.7,110.1,120.2,129.6,140.3,150.9,160.0,165.2,170.1,175.8,180.0];
     Cl_data = [0.185,0.896,1.032,1.085,1.100,1.040,0.987,1.010,1.259,1.426,1.509,1.412,1.034,0.657,0.332,0.038,-0.279,-0.565,-0.867,-1.290,-1.471,-1.410,-1.122,-1.046,-1.235,-1.023,-0.464];
+    tic;
     Cl = interp1(Cl_angle,Cl_data,AOA);     % Coeffent of lift
     Cd_angle = [1.9,5.6,7.8,10.2,12.6,15.0,17.4,20.1,24.9,30.0,39.7,50.2,60.3,70.2,90.0,100.4,110.3,120.1,130.3,140.1,150.5,160.6,165.4,170.1,175.5];
     Cd_data = [0.025,0.032,0.078,0.172,0.272,0.326,0.372,0.439,0.566,0.800,1.201,1.602,1.735,1.721,1.915,1.881,1.760,1.613,1.652,1.311,0.836,0.407,0.300,0.179,0.039];
     Cd = interp1(Cd_angle,Cd_data,AOA);     % Coeffent of drag
+    toc;
     
-    rho = 1.225;
-    area = 1;   
+    rho = 1.225;        % Move to setup?
+    area = 1;           % Sail area move to setup?
 %     lift = 0.5*Cl*rho*area*Va^2;  % lift [N]
 %     drag = 0.5*Cd*rho*area*Va^2;  % drag [N]
     F_net = 0.5*sqrt(Cl^2+Cd^2)*rho*area*Va^2;  % force on sail [N]
@@ -228,7 +230,9 @@ function Derivative(block)
     F_surge = F_net*cos(F_theta);                    % surge force on ship [N] - global (x co-ordinates)
     F_sway = F_net*sin(F_theta);                     % sway force on ship [N] - global (y co-ordinates)
     
-    % to do - compute differences due to 2 sails
+    % To do - compute differences due to 2 sails
+    % Surge and sway force is just the sum of both sails
+    % Yaw force will be generated due to two sail interaction
     
     rudder_coefficient = 0;         % maybe move to setUpDynamic?
 %     control = [thrust;0;0;delta*rudder_coefficient*u2];  % [surge,sway,roll,yaw]
