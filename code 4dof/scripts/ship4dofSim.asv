@@ -43,10 +43,9 @@ ics = zeros(8,1);
 % lim.angle  = deg2rad(15);
 
 % Define constant thrust and rudder angle: - change as desired
-% Thrust = 1e6;              % [N]
-Wv = 10;                % Prevailing wind speed [m/s]
-W_theta = 90;            % Prevailing wind angle [currently degrees]
-delta = deg2rad(0);     % [rad]
+T = 1e4;              % [N]
+delta = deg2rad(0);   % [rad]
+wi
 
 tic;
 %% Load the Simulink file:

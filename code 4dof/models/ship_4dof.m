@@ -18,7 +18,8 @@ function setup(block)
     block.SetPreCompOutPortInfoToDynamic;
     
     % Size the input ports correctly:
-    block.InputPort(1).Dimensions    = 2;    % control input vector (thrust, rudder angle)
+%     block.InputPort(1).Dimensions    = 2;    % control input vector (thrust, rudder angle)
+    block.InputPort(1).Dimensions    = 3;    % control input vector (Wind speed, wind angle, rudder angle)
     % Specify whether there is direct feedthrough:
     block.InputPort(1).DirectFeedthrough = false;
     block.InputPort(1).SamplingMode  = 'Sample';
@@ -108,8 +109,10 @@ function Derivative(block)
     
     % To make the code clearer, copy all desired parameters and states:
     % Input vector:
-    thrust = in(1);      % thrust [N]
-    delta  = in(2);      % rudder angle [rad]
+%     thrust = in(1);      % thrust [N]
+    Wv = in(1);           % Prevailing wind speed [m/s]
+    W_theta = in(2);      % Prevailing wind angle [degrees]
+    delta  = in(3);      % rudder angle [rad]
     
     % State vector:
     phi   = x(3);
@@ -195,23 +198,52 @@ function Derivative(block)
         0, -Nvrr*r2-Nv_v*abs_v-Nv_r*abs_r, 0, -Nrrr*r2-Nrvv*v2-Nv_r*abs_v-Nr_r*abs_r];
     eta = [0, 0, phi, psi]';            %% should be eta = [x, y, phi, psi]';
     nu =  [u, v, p, r]';
+    
+    %% Control
+    % Contol calculation % example Bow 2 sail output lift - move out of equations of motion
+    % Apparant and acutal wind   - (Independant of ship angle, dependent on course path) is it global coordinates?
+    Vs = u^2 + v^2;                                      % Ship speed [m/s]
+    S_theta = atand(v/u);                               % Ship course angle [degrees] (atan for rads) - global
+    TWA = 180-S_theta-W_theta;                         % True wind angle [degrees] - local (oriantated to ship course)
+    Va = sqrt(Vs^2+Wv^2-2*Vs*Wv*cos(TWA));        % Apparant wind speed [m/s]
+    AWA = asind((Wv/Va)*sind(TWA));               % Apparant wind angle (check) [degrees] - local (oriantated to ship course)
+        
+    AOA = 20;       % example sail angle of attack - local (oriantated to apparent wind angle)
+    Cl_angle = [0.2,5.6,6.8,8.0,10.5,12.6,15.0,17.5,25.7,30.2,40.2,50.3,59.7,69.2,79.9,90.3,99.7,110.1,120.2,129.6,140.3,150.9,160.0,165.2,170.1,175.8,180.0];
+    Cl_data = [0.185,0.896,1.032,1.085,1.100,1.040,0.987,1.010,1.259,1.426,1.509,1.412,1.034,0.657,0.332,0.038,-0.279,-0.565,-0.867,-1.290,-1.471,-1.410,-1.122,-1.046,-1.235,-1.023,-0.464];
+    Cl = interp1(Cl_angle,Cl_data,AOA);     % Coeffent of lift
+    Cd_angle = [1.9,5.6,7.8,10.2,12.6,15.0,17.4,20.1,24.9,30.0,39.7,50.2,60.3,70.2,90.0,100.4,110.3,120.1,130.3,140.1,150.5,160.6,165.4,170.1,175.5];
+    Cd_data = [0.025,0.032,0.078,0.172,0.272,0.326,0.372,0.439,0.566,0.800,1.201,1.602,1.735,1.721,1.915,1.881,1.760,1.613,1.652,1.311,0.836,0.407,0.300,0.179,0.039];
+    Cd = interp1(Cd_angle,Cd_data,AOA);     % Coeffent of drag
+    
+    rho = 1.225;
+    area = 1;   
+%     lift = 0.5*Cl*rho*area*Va^2;  % lift [N]
+%     drag = 0.5*Cd*rho*area*Va^2;  % drag [N]
+    F_net = 0.5*sqrt(Cl^2+Cd^2)*rho*area*Va^2;  % force on sail [N]
+    F_theta_l = atand(Cd/Cl);                     % angle on sail [degrees] (atan for rads) - local (oriantated to 90deg of AWA)
+%     Far = F_net*sind(AWA-F_theta_l);               % aerodynamic driving force [N] (atan for rads) - local (oriantated to course)
+%     Fas = F_net*cosd(AWA-F_theta_l);               % aerodynamic side force [N] (atan for rads) - local (oriantated to course)
+    F_theta = (90+F_theta_l-AWA-S_theta);            % angle on sail [degrees] - global (oriantated to x and y)
+    F_surge = F_net*cos(F_theta);                    % surge force on ship [N] - global (x co-ordinates)
+    F_sway = F_net*sin(F_theta);                     % sway force on ship [N] - global (y co-ordinates)
+    
+    % To do - compute differences due to 2 sails
+    % Surge and sway force is just the sum of both sails
+    % Yaw force will be generated due to two sail interaction
+    
+    rudder_coefficient = 0;         % maybe move to setUpDynamic?
+%     control = [thrust;0;0;delta*rudder_coefficient*u2];  % [surge,sway,roll,yaw]
+    control = [F_surge;F_sway;0;delta*rudder_coefficient*u2];  % [surge,sway,roll,yaw]     (may want to comute differences due to 2 sails)
+    
+    %% equations of motion
     % 4dof equation of motion
-    
-%     xdata = ;
-%     ydata =  ;
-%     x_input = ;     % an example value
-%     y_output = interp1(xdata,ydata,x_input);
-%     disp(y_output)
-    
-%     control = [thrust;0;0;delta*rudder_coefficient*u2]; % ???? [surge,sway,roll,yaw]
-    control = [10000;0;0;0]; %[test]
-    
     f = -Crb*nu-Ca*nu-D*nu-G*eta + control;  % check sign f=control-...
     dxdt2 = Minv*f;
     
     % Compute the right-hand side of the propulsion vector:
     % [dn/dt;du_p/dt] = f3(t);  %%
-%     dxdt3 = [(Q-Kn*n-Qnn*n_n)/Jm;...                                % will change - (just equation got propultion thrust?)?
+%     dxdt3 = [(Q-Kn*n-Qnn*n_n)/Jm;...                                
 %         (Tnn*n_n-CDl*up-CDq*abs(up)*(u-(1-wp)*u))/mf];
     
     % Store the inertial velocity as a work vector:
