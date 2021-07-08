@@ -86,6 +86,10 @@ roll.Kpd = (0.7e-5)*(ine.m*Lpp^2);       % [kg m2 rad-1] *m*L2
 roll.Kvd = (0.0)*(ine.m*Lpp);           % [kg m] *m*L
 roll.Krd = (-1.0e-5)*(ine.m*Lpp^2);      % [kg m2 rad-1] *m*L2
 
+%%
+
+
+
 %% Assemble the desired vectors:
 propulsion = [prop.Jm,prop.Kn,prop.mf,prop.l,prop.q,prop.wp,prop.tp];       %% edit
 actuators = [act.Tnn,act.Qnn,act.Yuuds,act.Muuds];                          %%
@@ -100,7 +104,6 @@ K = [roll.Kv_v,roll.Kr_r,roll.Krrr,roll.Kr_v,roll.Krvv,roll.Kv_r,roll.Kvrr,roll.
 M = [ine.m-surge.Xud, 0, 0, 0; 0, ine.m-sway.Yvd, ine.m*ine.zg-sway.Ypd, ine.m*ine.xg-sway.Yrd; 0, -ine.m*ine.zg-roll.Kvd, ine.Ixx-roll.Kpd, 0; 0, ine.m*ine.xg-yaw.Nvd, 0, ine.Izz-yaw.Nrd];
 % inverse
 Mi = pinv(M);
-
 %% Save the required data to file:
 auv.propulsion = propulsion;
 auv.actuators  = actuators;
@@ -110,4 +113,5 @@ auv.Y = Y;
 auv.N = N;
 auv.K = K;
 auv.Minv = Mi;
+
 save('C:/Users/arthu/OneDrive/Documents/MSC Individual/code/code 4dof/data/roro4dof.mat','auv');

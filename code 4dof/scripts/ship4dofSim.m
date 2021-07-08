@@ -45,7 +45,7 @@ ics = zeros(8,1);
 % Define constant thrust and rudder angle: - change as desired
 % Thrust = 1e6;              % [N]
 Wv = 10;                % Prevailing wind speed [m/s]
-W_theta = 90;            % Prevailing wind angle [currently degrees]
+W_theta = 90;           % Prevailing wind angle [currently degrees]
 delta = deg2rad(0);     % [rad]
 
 tic;
