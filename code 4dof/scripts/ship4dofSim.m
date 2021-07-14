@@ -46,7 +46,8 @@ ics = zeros(8,1);
 % Thrust = 1e6;              % [N]
 Wv = 10;                % Prevailing wind speed [m/s]
 W_theta = 90;           % Prevailing wind angle [currently degrees]
-delta = deg2rad(0);     % [rad]
+delta = deg2rad(20);     % Rudder angle [rad]
+AOA = 20;               % angle of attack sail [degrees]
 
 tic;
 %% Load the Simulink file:
@@ -67,7 +68,7 @@ toc;
 t = sout.tout;
 x = sout.get('logsout').getElement('states').Values.Data;
 v = sout.get('logsout').getElement('velocity').Values.Data;
-u = sout.get('logsout').getElement('input').Values.Data;
+% u = sout.get('logsout').getElement('input').Values.Data;
 % p = sout.get('logsout').getElement('angle').Values.Data;
 
 % Plot the AUV's motions:

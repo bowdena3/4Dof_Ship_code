@@ -19,7 +19,7 @@ function setup(block)
     
     % Size the input ports correctly:
 %     block.InputPort(1).Dimensions    = 3;    % control input vector (wind speed, wind angle, rudder angle)
-    block.InputPort(1).Dimensions    = 5;    % control input vector (control(surge,sway,yaw,roll), rudder angle)
+    block.InputPort(1).Dimensions    = 4;    % control input vector (control(surge,sway,yaw,roll)) %, rudder angle)
     % Specify whether there is direct feedthrough:
     block.InputPort(1).DirectFeedthrough = false;
     block.InputPort(1).SamplingMode  = 'Sample';
@@ -115,7 +115,7 @@ function Derivative(block)
     T_yaw = in(3);           % Control yaw force force [N]
     T_roll = in(4);           % Control roll force [N]
     
-    delta  = in(5);      % rudder angle [rad]
+%     delta  = in(5);      % rudder angle [rad]
     
     % State vector:
     phi   = x(3);
@@ -202,9 +202,8 @@ function Derivative(block)
     eta = [0, 0, phi, psi]';            %% should be eta = [x, y, phi, psi]';
     nu =  [u, v, p, r]';
    
-    rudder_coefficient = 0;         % maybe move to setUpDynamic?
 %     control = [thrust;0;delta*rudder_coefficient*u2;0];  % [surge,sway,yaw,roll]
-    control = [F_surge,F_sway,F_yaw+delta*rudder_coefficient*u2,F_roll] % [surge,sway,yaw,roll]
+    control = [F_surge;F_sway;T_yaw;T_roll]; % [surge,sway,yaw,roll]
     
     % equations of motion
     % 4dof equation of motion
