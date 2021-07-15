@@ -10,7 +10,7 @@ end
 %% Set up the block:
 function setup(block)
     % Register number of input and output ports:
-    block.NumInputPorts  = 2;
+    block.NumInputPorts  = 3;
     block.NumOutputPorts = 1;
 
     % Setup functional port properties to dynamically inherited:
@@ -27,6 +27,11 @@ function setup(block)
     % Specify whether there is direct feedthrough:
     block.InputPort(2).DirectFeedthrough = true;
     block.InputPort(2).SamplingMode  = 'Sample';
+    % Size the input ports correctly:
+    block.InputPort(3).Dimensions    = 1;    % input vector (propeller thrust)
+    % Specify whether there is direct feedthrough:
+    block.InputPort(3).DirectFeedthrough = true;
+    block.InputPort(3).SamplingMode  = 'Sample';
     
     % Size the output port correctly:
     block.OutputPort(1).Dimensions   = 4;        % Sail forces (return sail forces) (Fwing_x,Fwing_y,Fwing_yaw,Fwing_roll)
@@ -71,14 +76,15 @@ function Output(block)
     Cd_rud  = block.DialogPrm(5).Data;          % rudder Cd data
     
     % Extract the input vector:
-    delta = block.InputPort(1).Data          % rudder angle [rads] - local (oriantated to apparent wind angle)
+    delta = block.InputPort(1).Data;            % rudder angle [rads] - local (oriantated to apparent wind angle)
     ship_velocity = block.InputPort(2).Data;          % ship velocity
+    Thrust  = block.InputPort(3).Data;                % ship thrust
     
     % To make the code clearer, copy all desired parameters and states:
     % Input vectors:
-    u = ship_velocity(1)           % ship velocity x [m/s]
-    v = ship_velocity(2)           % ship velocity y [m/s]
-    phi = ship_velocity(3)         % ship yaw angle [rads]
+    u = ship_velocity(1);           % ship velocity x [m/s]
+    v = ship_velocity(2);           % ship velocity y [m/s]
+    phi = ship_velocity(3);         % ship yaw angle [rads]
     
     % Parameters:       % to change
     rho   = rudder(1);                 % density water  
@@ -91,38 +97,41 @@ function Output(block)
     % Prevents u = 0 causing infinite angles due to v/u
     sign = (0.5-isreal(sqrt(-u)))*2;           %calculate u sighn
     u = sign*(abs(u)+0.0001);                % add 0.001 to absolute valie of u
-    S_theta = atand(v/u)                               % Ship course angle [degrees] (atan for rads) - global +0.0001 so that inital velocity is not 0
+    S_theta = atand(v/u);                               % Ship course angle [degrees] (atan for rads) - global +0.0001 so that inital velocity is not 0
+    disp(S_theta)       %test
     
 %     AOA = delta + S_theta;                  % angle of attack on rudder
-    AOA = rad2deg(delta) + rad2deg(phi) - S_theta                  % angle of attack on rudder
+    AOA = rad2deg(delta) + rad2deg(phi) - S_theta;                  % angle of attack on rudder
+    disp(AOA)           %test
 
-    Cl = interp1(AOA_rud,Cl_rud,AOA)     % Coeffent of lift
-    Cd = interp1(AOA_rud,Cd_rud,AOA)     % Coeffent of drag
+    Cl = interp1(AOA_rud,Cl_rud,AOA);     % Coeffent of lift
+    Cd = interp1(AOA_rud,Cd_rud,AOA);     % Coeffent of drag
+    disp(Cl)            %test
     
     % Prevents Cl = 0 causing infinite angles due to Cd/Cl
     sign = (0.5-isreal(sqrt(-Cl)))*2;           %calculate Cl sighn
     Cl = sign*(abs(Cl)+0.0001);                % add 0.001 to absolute valie of Cl
     
     F_net = 0.5*sqrt(Cl^2 + Cd^2)*rho*area*Vs^2;   % force on rudder [N]
-    F_theta_l = atand(Cd/(Cl+0.0001))                      % angle on rudder [degrees] (atan for rads) - local (oriantated to 90deg of coursw angle)
+    F_theta_l = atand(Cd/Cl);                      % angle on rudder [degrees] (atan for rads) - local (oriantated to 90deg of coursw angle)
     
-    F_theta = (90 + F_theta_l - AOA - rad2deg(delta) - rad2deg(phi))       % angle on rudder [degrees] - global (oriantated to x and y)
-    F_theta2 = (F_theta_l + rad2deg(phi) + rad2deg(delta) + AOA - 90)
-    F_theta1 = (90 + F_theta_l - S_theta - rad2deg(phi))
-    F_theta2 = (F_theta_l + Vs + rad2deg(phi) - 90)
+%     F_theta = (180 - S_theta - 90 - F_theta_1);       % angle on rudder [degrees] - global (oriantated to x and y)
+    F_theta = (90 - S_theta - F_theta_l);       % angle on rudder [degrees] - global (oriantated to x and y)
     
-    F_surge = F_net*cosd(F_theta)                    % surge force on ship [N] - global (x co-ordinates)
-    F_sway = F_net*sind(F_theta)                     % sway force on ship [N] - global (y co-ordinates)
+    F_surge = F_net*cosd(F_theta);                    % surge force on ship [N] - global (x co-ordinates)
+    F_sway = F_net*sind(F_theta);                     % sway force on ship [N] - global (y co-ordinates)
     
     % compute Yaw and Roll tourque
-    Fas = F_surge*cos(phi) + F_sway*cos(phi)       % aerodynamic side force [N]
-    T_yaw = -Fas*0.5*d;                                    % yaw torque on ship [Nm]
+    Fas = F_surge*cos(phi) + F_sway*cos(phi);       % aerodynamic side force [N]
+    T_yaw = -Fas*d;                                    % yaw torque on ship [Nm]
     T_roll = -Fas*0.5*height;                              % roll torque on ship [Nm]
-    
+        
     % Trust propeller
     % Approximate thrust generated by propeller
-    Thrust = 1e6;              % [N]    
-    control = [F_surge+Thrust;F_sway;T_yaw;T_roll];            % [surge,sway,roll,yaw]
+%     Thrust = 1e6;              % [N]
+    Thrust_surge = Thrust*cos(phi);      % [N]
+    Thrust_sway = Thrust*sin(phi);       % [N]
+    control = [(F_surge+Thrust_surge);(F_sway+Thrust_sway);T_yaw;T_roll];            % [surge,sway,roll,yaw]
         
     % Output the force applied to the ship:
     block.OutputPort(1).Data = control;

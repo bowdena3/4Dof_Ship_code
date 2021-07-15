@@ -48,6 +48,7 @@ Wv = 10;                % Prevailing wind speed [m/s]
 W_theta = 90;           % Prevailing wind angle [currently degrees]
 delta = deg2rad(20);     % Rudder angle [rad]
 AOA = 20;               % angle of attack sail [degrees]
+Thrust = 1e6;           % propeller thrust [N]
 
 tic;
 %% Load the Simulink file:
