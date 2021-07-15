@@ -96,7 +96,7 @@ function Output(block)
 %     ship_velocity = in(2);          % ship velocity
     u = ship_velocity(1);           % ship velocity x [m/s]
     v = ship_velocity(2);           % ship velocity y [m/s]
-    phi = ship_velocity(3);         % ship yaw angle [rads]
+    psi = ship_velocity(3);         % ship yaw angle [rads]
     
 %     wind_vector = in(3);           % Prevailing wind vector
     Wv = wind_vector(1);           % Prevailing wind speed [m/s]
@@ -122,7 +122,7 @@ function Output(block)
     Cd1 = interp1(Cd_angle,Cd_data,AOA);     % Coeffent of drag
     
     % Scale coeffents of drag based on data from Bordogna, G et al., (2018)
-    W_O = AWA + S_theta - rad2deg(phi);    % wind oriantation angle - angle between wind and ship angle
+    W_O = AWA + S_theta - rad2deg(psi);    % wind oriantation angle - angle between wind and ship angle
     Cl_ratio = interp1(wind_oriantation,Cl_ratio,W_O);
     Cd_ratio = interp1(wind_oriantation,Cd_ratio,W_O);
     Cl2 = Cl_ratio*Cl1;                       % calculating 2 sail Cl
@@ -141,11 +141,11 @@ function Output(block)
     F_sway = F_net*sind(F_theta);                     % sway force on ship [N] - global (y co-ordinates)
     
     % compute Yaw and Roll tourque
-    Fas = F_surge*cosd(phi) + F_sway*cosd(phi);       % aerodynamic side force [N]
+    Fas = F_surge*cosd(psi) + F_sway*cosd(psi);       % aerodynamic side force [N]
+    T_roll = Fas*0.5*height;                          % roll torque on ship [Nm]
     T_yaw = Fas*d;                                    % yaw torque on ship [Nm]
-    T_roll = Fas*0.5*height;                              % roll torque on ship [Nm]
             
-    control = [F_surge;F_sway;T_yaw;T_roll];            % [surge,sway,roll,yaw]
+    control = [F_surge;F_sway;T_roll;T_yaw];            % [surge,sway,roll,yaw]
     
     % Output the force applied to the ship:
     block.OutputPort(1).Data = control;

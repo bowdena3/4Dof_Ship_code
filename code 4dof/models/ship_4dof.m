@@ -19,7 +19,7 @@ function setup(block)
     
     % Size the input ports correctly:
 %     block.InputPort(1).Dimensions    = 3;    % control input vector (wind speed, wind angle, rudder angle)
-    block.InputPort(1).Dimensions    = 4;    % control input vector (control(surge,sway,yaw,roll)) %, rudder angle)
+    block.InputPort(1).Dimensions    = 4;    % control input vector (control(surge,sway,roll(p),yaw(r))) %, rudder angle)
     % Specify whether there is direct feedthrough:
     block.InputPort(1).DirectFeedthrough = false;
     block.InputPort(1).SamplingMode  = 'Sample';
@@ -112,8 +112,8 @@ function Derivative(block)
 %     control = in(1);           % Control forces [surge,sway,yaw,roll] [N]
     F_surge = in(1);           % Control surge force [N]
     F_sway = in(2);           % Control sway force force [N]
-    T_yaw = in(3);           % Control yaw force force [N]
-    T_roll = in(4);           % Control roll force [N]
+    T_roll = in(3);           % Control roll force [N]    
+    T_yaw = in(4);           % Control yaw force force [N]
     
 %     delta  = in(5);      % rudder angle [rad]
     
@@ -202,8 +202,8 @@ function Derivative(block)
     eta = [0, 0, phi, psi]';            %% should be eta = [x, y, phi, psi]';
     nu =  [u, v, p, r]';
    
-%     control = [thrust;0;delta*rudder_coefficient*u2;0];  % [surge,sway,yaw,roll]
-    control = [F_surge;F_sway;T_yaw;T_roll]; % [surge,sway,yaw,roll]
+%     control = [thrust;0;delta*rudder_coefficient*u2;0];  % [surge,sway,roll,yaw]
+    control = [F_surge;F_sway;T_roll;T_yaw]; % [surge,sway,roll,yaw]
     
     % equations of motion
     % 4dof equation of motion
@@ -212,7 +212,7 @@ function Derivative(block)
     
     % Compute the right-hand side of the propulsion vector:
     % [dn/dt;du_p/dt] = f3(t);  %%
-%     dxdt3 = [(Q-Kn*n-Qnn*n_n)/Jm;...                                
+%     dxdt3 = [(Q-Kn*n-Qnn*n_n)/Jm;...
 %         (Tnn*n_n-CDl*up-CDq*abs(up)*(u-(1-wp)*u))/mf];
     
     % Store the inertial velocity as a work vector:

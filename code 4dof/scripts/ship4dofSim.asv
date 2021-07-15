@@ -43,11 +43,11 @@ ics = zeros(8,1);
 % lim.angle  = deg2rad(15);
 
 % Define constant thrust and rudder angle: - change as desired
-% Thrust = 1e6;              % [N]
 Wv = 10;                % Prevailing wind speed [m/s]
 W_theta = 90;           % Prevailing wind angle [currently degrees]
-delta = deg2rad(0);     % Rudder angle [rad]
+delta = deg2rad(20);    % Rudder angle [rad]
 AOA = 20;               % angle of attack sail [degrees]
+Thrust = 1e6;           % propeller thrust [N] 1e6
 
 tic;
 %% Load the Simulink file:
@@ -68,10 +68,10 @@ toc;
 t = sout.tout;
 x = sout.get('logsout').getElement('states').Values.Data;
 v = sout.get('logsout').getElement('velocity').Values.Data;
-u = sout.get('logsout').getElement ('input').Values.Data;
+% u = sout.get('logsout').getElement('input').Values.Data;
 % p = sout.get('logsout').getElement('angle').Values.Data;
 
 % Plot the AUV's motions:
-plotMotions(t,x(:,1:3),v);
+plotMotions(t,x(:,1:4),v);
 % Plot the AUV's control input:
 % plotControl(t,u(:,1),rad2deg(u(:,2)),x(:,7));

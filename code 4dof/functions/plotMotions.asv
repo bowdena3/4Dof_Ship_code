@@ -28,7 +28,7 @@ grid on;
 set(gca,'TickLabelInterpreter','Latex');
 
 subplot(4,1,4);
-plot(t,rad2deg(wrapToPi(x(:,4))),'Color',[0.1,0.6940,0.1],...
+plot(t,rad2deg(wrapToPi(x(:,4))),'Color',[0.9290,0.6940,0.1250],...
     'LineWidth',1.5);
 xlabel('Time [s]','Interpreter','Latex');
 ylabel('$\phi$ [$^\circ$]','Interpreter','Latex');
@@ -57,7 +57,7 @@ grid on;
 set(gca,'TickLabelInterpreter','Latex');
 
 subplot(4,1,4);
-plot(t,rad2deg(v(:,4)),'Color',[0.1,0.6940,0.1],'LineWidth',1.5);
+plot(t,rad2deg(v(:,4)),'Color',[0.9290,0.6940,0.1250],'LineWidth',1.5);
 xlabel('Time [s]','Interpreter','Latex');
 ylabel('$\dot{\phi}$ [$^\circ$/s]','Interpreter','Latex');
 grid on;
