@@ -114,7 +114,7 @@ function Output(block)
     
     % compute Yaw and Roll tourque
     Fas = F_surge*cos(phi) + F_sway*cos(phi);       % aerodynamic side force [N]
-    T_yaw = -Fas*0.5*d;                                    % yaw torque on ship [Nm]
+    T_yaw = -Fas*d;                                    % yaw torque on ship [Nm]
     T_roll = -Fas*0.5*height;                              % roll torque on ship [Nm]
     
     % Trust propeller
