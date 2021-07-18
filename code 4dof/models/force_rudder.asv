@@ -101,7 +101,6 @@ function Output(block)
     
 %     AOA = delta + S_theta;                  % angle of attack on rudder
     AOA = rad2deg(delta) + rad2deg(psi) - S_theta;                  % angle of attack on rudder
-    AOA
 
     Cl = interp1(AOA_rud,Cl_rud,AOA);     % Coeffent of lift
     Cd = interp1(AOA_rud,Cd_rud,AOA);     % Coeffent of drag
@@ -129,8 +128,8 @@ function Output(block)
 %     Thrust = 1e6;              % [N]
     Thrust_surge = Thrust*cos(psi);      % [N]
     Thrust_sway = Thrust*sin(psi);       % [N]
-    control = [(F_surge+Thrust_surge);(F_sway+Thrust_sway);T_roll;T_yaw];            % [surge,sway,roll,yaw]
-        
+    control = [(F_surge+Thrust_surge);(F_sway+Thrust_sway);T_roll;T_yaw];            % [surge,sway,roll,yaw]   
+    
     % Output the force applied to the ship:
     block.OutputPort(1).Data = control;
 end

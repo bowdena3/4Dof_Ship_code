@@ -85,21 +85,15 @@ function Output(block)
     
     % Extract the input vector:
 %     in = block.InputPort(1).Data;
-    AOA = block.InputPort(1).Data;          % wing angle of attack [degrees] - local (oriantated to apparent wind angle)
+    W_delta = block.InputPort(1).Data;          % wing angle [degrees] - local
     ship_velocity = block.InputPort(2).Data;          % ship velocity
     wind_vector = block.InputPort(3).Data;           % Prevailing wind vector
     
-    % To make the code clearer, copy all desired parameters and states:
-    % Input vectors:
-%     AOA = in(1);          % wing angle of attack [degrees] - local (oriantated to apparent wind angle)
-    
-%     ship_velocity = in(2);          % ship velocity
     u = ship_velocity(1);           % ship velocity x [m/s]
     v = ship_velocity(2);           % ship velocity y [m/s]
     psi = ship_velocity(3);         % ship yaw angle [rads]
     
-%     wind_vector = in(3);           % Prevailing wind vector
-    Wv = wind_vector(1);           % Prevailing wind speed [m/s]
+    Vt = wind_vector(1);           % Prevailing wind speed [m/s]
     W_theta = wind_vector(2);      % Prevailing wind angle [degrees]
     
     % Parameters:       % to change
@@ -111,13 +105,16 @@ function Output(block)
     % Apparant and acutal wind   - (Independant of ship angle, dependent on course path) is it global coordinates?
     Vs = sqrt(u^2 + v^2);                                      % Ship speed [m/s]
     % Prevents u = 0 causing infinite angles due to v/u
-    sign = (0.5-isreal(sqrt(-u)))*2;           %calculate u sighn
+    sign = (0.5-isreal(sqrt(-u)))*2;           % calculate u sighn
     u = sign*(abs(u)+0.0001);                % add 0.001 to absolute valie of u    
-    S_theta = atand(v/(u));                               % Ship course angle [degrees] (atan for rads) - global +0.0001 so that inital velocity is not 0
-    TWA = 180+S_theta-W_theta;                         % True wind angle [degrees] - local (oriantated to ship course)
-    Va = sqrt(Vs^2+Wv^2-2*Vs*Wv*cosd(TWA));        % Apparant wind speed [m/s]
-    AWA = asind((Wv/Va)*sind(TWA));               % Apparant wind angle (check) [degrees] - local (oriantated to ship course)
-        
+    S_theta = atand(v/u);                               % Ship course angle [degrees] (atan for rads) - global +0.0001 so that inital velocity is not 0
+    
+    TWA = 180 + S_theta - W_theta                         % True wind angle [degrees] - local (oriantated to ship course)
+    
+    Va = sqrt(Vs^2+Vt^2-2*Vs*Vt*cosd(TWA));        % Apparant wind speed [m/s]
+    AWA = asind((Vt/Va)*sind(TWA));               % Apparant wind angle (check) [degrees] - local (oriantated to ship course)
+    
+    AOA = AWA + S_theta - rad2deg(psi) - rad2deg(W_delta);
     Cl1 = interp1(Cl_angle,Cl_data,AOA);     % Coeffent of lift
     Cd1 = interp1(Cd_angle,Cd_data,AOA);     % Coeffent of drag
     
@@ -128,20 +125,18 @@ function Output(block)
     Cl2 = Cl_ratio*Cl1;                       % calculating 2 sail Cl
     Cd2 = Cd_ratio*Cd1;                       % calculating 2sail Cd
        
-    F_net = 0.5*sqrt(Cl2^2 + Cd2^2)*rho*area*Va^2;   % force on sail [N]
+    F_net = 0.5*sqrt(Cl2^2 + Cd2^2)*rho*area*Va^2   % force on sail [N]
     % Prevents Cl2 = 0 causing infinite angles due to v/u
     sign = (0.5-isreal(sqrt(-Cl2)))*2;           %calculate Cl2 sighn
     Cl2 = sign*(abs(Cl2)+0.0001);                % add 0.001 to absolute valie of u
+    F_theta = atand(Cd2/Cl2)                      % angle on sail [degrees] (atan for rads) - local (oriantated to 90deg of AWA)
     
-    F_theta_l = atand(Cd2/Cl2);                      % angle on sail [degrees] (atan for rads) - local (oriantated to 90deg of AWA)
-%     Far = F_net*sind(AWA-F_theta_l);               % aerodynamic driving force [N] (atan for rads) - local (oriantated to course)
-%     Fas = F_net*cosd(AWA-F_theta_l);               % aerodynamic side force [N] (atan for rads) - local (oriantated to course)
-    F_theta = (90 + F_theta_l - AWA - S_theta);      % angle on sail [degrees] - global (oriantated to x and y)
-    F_surge = F_net*cosd(F_theta);                    % surge force on ship [N] - global (x co-ordinates)
-    F_sway = F_net*sind(F_theta);                     % sway force on ship [N] - global (y co-ordinates)
-    
+    F_surge = F_net*cosd(AWA+S_theta-90-F_theta);                    % surge force on ship [N] - global (x co-ordinates)
+    F_sway = F_net*sind(AWA+S_theta-90-F_theta);                     % sway force on ship [N] - global (y co-ordinates)
+%     Far = F_net*sind(AWA+S_theta-90-F_theta-rad2deg(psi));               % aerodynamic driving force [N] (atan for rads) - local (oriantated to course)
+    Fas = F_net*cosd(AWA+S_theta-90-F_theta-rad2deg(psi));               % aerodynamic side force [N] (atan for rads) - local (oriantated to course)
+ 
     % compute Yaw and Roll tourque
-    Fas = F_surge*cosd(psi) + F_sway*cosd(psi);       % aerodynamic side force [N]
     T_roll = Fas*0.5*height;                          % roll torque on ship [Nm]
     T_yaw = Fas*d;                                    % yaw torque on ship [Nm]
             

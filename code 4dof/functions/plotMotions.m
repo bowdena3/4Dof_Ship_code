@@ -23,7 +23,7 @@ set(gca,'TickLabelInterpreter','Latex');
 subplot(4,1,3);
 plot(t,rad2deg(wrapToPi(x(:,3))),'Color',[0.9290,0.6940,0.1250],...
     'LineWidth',1.5);
-ylabel('$\psi$ [$^\circ$]','Interpreter','Latex');
+ylabel('$\phi$ [$^\circ$]','Interpreter','Latex');
 grid on;
 set(gca,'TickLabelInterpreter','Latex');
 
@@ -31,7 +31,7 @@ subplot(4,1,4);
 plot(t,rad2deg(wrapToPi(x(:,4))),'Color',[0.1,0.6940,0.1],...
     'LineWidth',1.5);
 xlabel('Time [s]','Interpreter','Latex');
-ylabel('$\phi$ [$^\circ$]','Interpreter','Latex');
+ylabel('$\psi$ [$^\circ$]','Interpreter','Latex');
 grid on;
 set(gca,'TickLabelInterpreter','Latex');
 set(gcf,'color','w');
@@ -52,14 +52,23 @@ set(gca,'TickLabelInterpreter','Latex');
 
 subplot(4,1,3);
 plot(t,rad2deg(v(:,3)),'Color',[0.9290,0.6940,0.1250],'LineWidth',1.5);
-ylabel('$\dot{\psi}$ [$^\circ$/s]','Interpreter','Latex');
+ylabel('$\dot{\phi}$ [$^\circ$/s]','Interpreter','Latex');
 grid on;
 set(gca,'TickLabelInterpreter','Latex');
 
 subplot(4,1,4);
 plot(t,rad2deg(v(:,4)),'Color',[0.1,0.6940,0.1],'LineWidth',1.5);
 xlabel('Time [s]','Interpreter','Latex');
-ylabel('$\dot{\phi}$ [$^\circ$/s]','Interpreter','Latex');
+ylabel('$\dot{\psi}$ [$^\circ$/s]','Interpreter','Latex');
+grid on;
+set(gca,'TickLabelInterpreter','Latex');
+set(gcf,'color','w');
+
+%% Path ship
+figure;
+plot(x(:,1),x(:,2),'Color',[0.600,0.200,0.600],'LineWidth',1.5);
+xlabel('$x$ [m]','Interpreter','Latex');
+ylabel('$y$ [m]','Interpreter','Latex');
 grid on;
 set(gca,'TickLabelInterpreter','Latex');
 set(gcf,'color','w');

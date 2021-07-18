@@ -201,8 +201,7 @@ function Derivative(block)
         0, -Nvrr*r2-Nv_v*abs_v-Nv_r*abs_r, 0, -Nrrr*r2-Nrvv*v2-Nv_r*abs_v-Nr_r*abs_r];
     eta = [0, 0, phi, psi]';            %% should be eta = [x, y, phi, psi]';
     nu =  [u, v, p, r]';
-   
-%     control = [thrust;0;delta*rudder_coefficient*u2;0];  % [surge,sway,roll,yaw]
+           
     control = [F_surge;F_sway;T_roll;T_yaw]; % [surge,sway,roll,yaw]
     
     % equations of motion
