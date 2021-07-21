@@ -46,7 +46,7 @@ ics = zeros(8,1);
 Wv = 10;                % Prevailing wind speed [m/s]
 W_theta = 90;           % Prevailing wind angle [currently degrees]
 W_delta = deg2rad(70);  % Wing angle [rad]
-R_delta = deg2rad(40);  % Rudder angle [rad]
+R_delta = deg2rad(0);  % Rudder angle [rad]
 Thrust = 1e6;           % propeller thrust [N] 1e6
 
 tic;

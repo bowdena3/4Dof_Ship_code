@@ -18,7 +18,7 @@ function setup(block)
     block.SetPreCompOutPortInfoToDynamic;
     
     % Size the input ports correctly:
-    block.InputPort(1).Dimensions    = 1;    % control input vector (AOA)
+    block.InputPort(1).Dimensions    = 1;    % control input vector (delta)
     % Specify whether there is direct feedthrough:
     block.InputPort(1).DirectFeedthrough = true;
     block.InputPort(1).SamplingMode  = 'Sample';
