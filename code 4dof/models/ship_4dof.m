@@ -109,13 +109,10 @@ function Derivative(block)
     
     % To make the code clearer, copy all desired parameters and states:
     % Input vector:    
-%     control = in(1);           % Control forces [surge,sway,yaw,roll] [N]
     F_surge = in(1);           % Control surge force [N]
     F_sway = in(2);           % Control sway force force [N]
     T_roll = in(3);           % Control roll force [N]    
     T_yaw = in(4);           % Control yaw force force [N]
-    
-%     delta  = in(5);      % rudder angle [rad]
     
     % State vector:
     phi   = x(3);
@@ -124,7 +121,6 @@ function Derivative(block)
     v     = x(6);
     p     = x(7);
     r     = x(8);
-    %add delta, phi etc
     
     % Parameters:
     m    = rbd(1);

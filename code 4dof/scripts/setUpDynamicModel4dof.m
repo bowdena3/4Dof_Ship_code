@@ -11,14 +11,14 @@ clear;
 close all;
 
 %% Input the parameters for the model:
-% Propeller values:             %% Too remove?
-prop.mf = 0.51865;     % [kg]
-prop.Kn = 0.5;         % [kg m2 s-1]
-prop.Jm = 1;           % [kg m2]
-prop.wp = 0.2;
-prop.tp = 0.1;
-prop.l = 6.604;
-prop.q = 16.51;
+% % Propeller values:             %% Too remove?
+% prop.mf = 0.51865;     % [kg]
+% prop.Kn = 0.5;         % [kg m2 s-1]
+% prop.Jm = 1;           % [kg m2]
+% prop.wp = 0.2;
+% prop.tp = 0.1;
+% prop.l = 6.604;
+% prop.q = 16.51;
 
 % Actuation:                    %%(not updated)
 act.Tnn = 6.279e-4;   % [kg m rad-2]     % Thrust coefficient 
@@ -87,9 +87,9 @@ roll.Kvd = (0.0)*(ine.m*Lpp);           % [kg m] *m*L
 roll.Krd = (-1.0e-5)*(ine.m*Lpp^2);      % [kg m2 rad-1] *m*L2
 
 % Wing parameters: 
-wing.rho = 1.225;                        % [kg/m3] density air - move to setup?
-wing.area = 1;                           % [m2] Sail area - move to setup?
-height = 2;
+wing.rho = 1.225;                        % [kg/m3] density air
+wing.area = 1920;                           % [m2] Sail area - (80*24)
+height = 80;
 wing.height = height;                         % [m] height of wing - move to setup?
 % d_bow = 0.5*2.5*wing.height;                 % [m] Bow sail distance from COG - 0.5*2.5*height?
 % d_stern = -0.5*2.5*wing.height;                 % [m] Stern sail distance from COG - 0.5*2.5*height?
@@ -102,7 +102,7 @@ rud.area = span*chord;                  % [m2] rudder area
 rud.depth = span;                         % [m] span of rudder 
 
 %% Assemble the desired vectors:
-propulsion = [prop.Jm,prop.Kn,prop.mf,prop.l,prop.q,prop.wp,prop.tp];       %% edit
+% propulsion = [prop.Jm,prop.Kn,prop.mf,prop.l,prop.q,prop.wp,prop.tp];       %% edit
 actuators = [act.Tnn,act.Qnn,act.Yuuds,act.Muuds];                          %%
 rigid_body = [ine.m,ine.xg,ine.zg,ine.Ixx,ine.Izz];
 X = [surge.Xvv,surge.Xuu,surge.Xuuu,surge.Xrr,surge.Xvr,surge.Xud];
@@ -111,8 +111,8 @@ N = [yaw.Nv_v,yaw.Nr_r,yaw.Nrrr,yaw.Nr_v,yaw.Nrvv,yaw.Nv_r,yaw.Nvrr,yaw.Nvd];
 K = [roll.Kv_v,roll.Kr_r,roll.Krrr,roll.Kr_v,roll.Krvv,roll.Kv_r,roll.Kvrr,roll.Kp,roll.Kppp,roll.Kvd];
 
 wing = [wing.rho,wing.area,wing.height];
-d_bow = 0.5*2.5*(height);                 % [m] Bow sail distance from COG - 0.5*2.5*height?
-d_stern = -0.5*2.5*(height);                 % [m] Stern sail distance from COG - 0.5*2.5*height?
+d_bow = 0.5*2.5*(24);                 % [m] Bow sail distance from COG - 0.5*2.5*height?
+d_stern = -0.5*2.5*(24);                 % [m] Stern sail distance from COG - 0.5*2.5*height?
 
 rud = [rud.rho,rud.area,rud.depth];
 d_rud = 115;                 % [m] rudder distance from COG - 230m boat
@@ -122,7 +122,7 @@ Cl_angle = [-180.0,-175.8,-170.1,-165.2,-160.0,-150.9,-140.3,-129.6,-120.2,-110.
 Cl_data = [0.464,1.023,1.235,1.046,1.122,1.410,1.471,1.290,0.867,0.565,0.279,-0.038,-0.332,-0.657,-1.034,-1.412,-1.509,-1.426,-1.259,-1.010,-0.987,-1.040,-1.100,-1.085,-1.032,-0.896,-0.185,0.185,0.896,1.032,1.085,1.100,1.040,0.987,1.010,1.259,1.426,1.509,1.412,1.034,0.657,0.332,0.038,-0.279,-0.565,-0.867,-1.290,-1.471,-1.410,-1.122,-1.046,-1.235,-1.023,-0.464];
 % Sail drag data
 Cd_angle = [-175.5,-170.1,-160.6,-165.4,-150.5,-140.1,-130.3,-120.1,-110.3,-100.4,-90.0,-70.2,-60.3,-50.2,-39.7,-30.0,-24.9,-20.1,-17.4,-15.0,-12.6,-10.2,-7.8,-5.6,-1.9,1.9,5.6,7.8,10.2,12.6,15.0,17.4,20.1,24.9,30.0,39.7,50.2,60.3,70.2,90.0,100.4,110.3,120.1,130.3,140.1,150.5,160.6,165.4,170.1,175.5];
-Cd_data = [-0.039,-0.179,-0.407,-0.300,-0.836,-1.311,-1.652,-1.613,-1.760,-1.881,-1.915,-1.721,-1.735,-1.602,-1.201,-0.800,-0.566,-0.439,-0.372,-0.326,-0.272,-0.172,-0.078,-0.032,-0.025,0.025,0.032,0.078,0.172,0.272,0.326,0.372,0.439,0.566,0.800,1.201,1.602,1.735,1.721,1.915,1.881,1.760,1.613,1.652,1.311,0.836,0.407,0.300,0.179,0.039];
+Cd_data = [0.039,0.179,0.407,0.300,0.836,1.311,1.652,1.613,1.760,1.881,1.915,1.721,1.735,1.602,1.201,0.800,0.566,0.439,0.372,0.326,0.272,0.172,0.078,0.032,0.025,0.025,0.032,0.078,0.172,0.272,0.326,0.372,0.439,0.566,0.800,1.201,1.602,1.735,1.721,1.915,1.881,1.760,1.613,1.652,1.311,0.836,0.407,0.300,0.179,0.039];
 % 2 sail coeffient scale factors
 wind_oriantation = [20,30,35,45,60,75,90,105,120,135,150,165,180];
 Cl_ratio_bow = [1.26,1.41,1.38,1.38,1.30,1.26,1.20,1.18,1.13,0.93,0.97,-9.66,0.00];
@@ -141,7 +141,7 @@ M = [ine.m-surge.Xud, 0, 0, 0; 0, ine.m-sway.Yvd, ine.m*ine.zg-sway.Ypd, ine.m*i
 Mi = pinv(M);
 
 %% Save the required data to file:
-ship.propulsion = propulsion;
+% ship.propulsion = propulsion;
 ship.actuators  = actuators;
 ship.rigid_body = rigid_body;
 ship.X = X;

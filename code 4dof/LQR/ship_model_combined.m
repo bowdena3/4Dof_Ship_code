@@ -1,5 +1,5 @@
-function ship_4dof(block)
-% remus_dynamics.m     mail     30/06/2021
+function ship_model_combined(block)
+% ship_model_Combined.m     mail     30/06/2021
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This is a Level-2 Matlab S-function for the modelling of the dynamics of
 % an ship in 4 DOF.
@@ -10,19 +10,23 @@ end
 %% Set up the block:
 function setup(block)
     % Register number of input and output ports:
-    block.NumInputPorts  = 1;
+    block.NumInputPorts  = 2;
     block.NumOutputPorts = 2;
 
     % Setup functional port properties to dynamically inherited:
     block.SetPreCompInpPortInfoToDynamic;
     block.SetPreCompOutPortInfoToDynamic;
     
-    % Size the input ports correctly:
-%     block.InputPort(1).Dimensions    = 3;    % control input vector (wind speed, wind angle, rudder angle)
-    block.InputPort(1).Dimensions    = 4;    % control input vector (control(surge,sway,roll(p),yaw(r))) %, rudder angle)
+    block.InputPort(1).Dimensions    = 3;    % controlable vectors (ship angle, rudder angle, thrust)
     % Specify whether there is direct feedthrough:
     block.InputPort(1).DirectFeedthrough = false;
     block.InputPort(1).SamplingMode  = 'Sample';
+    % Size the input ports correctly:
+    block.InputPort(2).Dimensions    = 2;    % control input vector (wind speed, wind angle)
+    % Specify whether there is direct feedthrough:
+    block.InputPort(2).DirectFeedthrough = false;
+    block.InputPort(2).SamplingMode  = 'Sample';
+    % Size the input ports correctly:
     
     % Size the output port correctly:
 %     block.OutputPort(1).Dimensions   = 8;        % continuous states (return state vecotrs) ((X,Y,theta),(u,w,q),(,) )
@@ -85,7 +89,7 @@ function Output(block)
     % Output the continuous states:
     block.OutputPort(1).Data = block.ContStates.Data;
     % Output the inertial velocity:
-    block.OutputPort(2).Data = block.Dwork(1).Data;
+    block.OutputPort(2).Data = block.Dwork(1).Data;    
 end
 
 %% Compute the derivative of the continuous states:
@@ -103,16 +107,19 @@ function Derivative(block)
     
     % Extract the input vector:
     in = block.InputPort(1).Data;
+    in2 = block.InputPort(2).Data;
     
     % Extract the continuous states:
     x = block.ContStates.Data;
     
     % To make the code clearer, copy all desired parameters and states:
     % Input vector:    
-    F_surge = in(1);           % Control surge force [N]
-    F_sway = in(2);           % Control sway force force [N]
-    T_roll = in(3);           % Control roll force [N]    
-    T_yaw = in(4);           % Control yaw force force [N]
+    W_delta = in(1);        % ship angle
+    delta = in(1);          % rudder angle
+    Thrust = in(1);         % thrust
+    
+    Vt = in2(1);            % wind speed
+    W_theta = in2(2)        % wind angle
     
     % State vector:
     phi   = x(3);
@@ -163,6 +170,19 @@ function Derivative(block)
     Nvrr = N(7);
     Nvd = N(8);
     
+    % Rudder model
+    
+    
+    
+    % Wing model
+    
+    
+    
+    F_surge = ;           % Control surge force [N]
+    F_sway = ;           % Control sway force force [N]
+    T_roll = ;           % Control roll force [N]    
+    T_yaw = ;           % Control yaw force force [N]
+        
     % Speed up the calculations: pre-compute recurring terms:
     u2 = u^2;
     v2 = v^2;
@@ -204,11 +224,6 @@ function Derivative(block)
     % 4dof equation of motion
     f = -Crb*nu-Ca*nu-D*nu-G*eta + control;  % check sign f=control-...
     dxdt2 = Minv*f;
-    
-    % Compute the right-hand side of the propulsion vector:
-    % [dn/dt;du_p/dt] = f3(t);  %%
-%     dxdt3 = [(Q-Kn*n-Qnn*n_n)/Jm;...
-%         (Tnn*n_n-CDl*up-CDq*abs(up)*(u-(1-wp)*u))/mf];
     
     % Store the inertial velocity as a work vector:
     block.Dwork(1).Data = dxdt1;
