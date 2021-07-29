@@ -23,7 +23,7 @@ function setup(block)
     block.InputPort(1).DirectFeedthrough = true;
     block.InputPort(1).SamplingMode  = 'Sample';
     % Size the input ports correctly:
-    block.InputPort(2).Dimensions    = 3;    % control input vector (ship vector)
+    block.InputPort(2).Dimensions    = 4;    % control input vector (ship vector)
     % Specify whether there is direct feedthrough:
     block.InputPort(2).DirectFeedthrough = true;
     block.InputPort(2).SamplingMode  = 'Sample';
@@ -84,7 +84,8 @@ function Output(block)
     % Input vectors:
     u = ship_velocity(1);           % ship velocity x [m/s]
     v = ship_velocity(2);           % ship velocity y [m/s]
-    psi = ship_velocity(3);         % ship yaw angle [rads]
+%     psi = ship_velocity(3);         % ship roll angle [rads]
+    psi = ship_velocity(4);         % ship yaw angle [rads]
     
     % Parameters:       % to change
     rho   = rudder(1);                 % density water  
@@ -112,7 +113,6 @@ function Output(block)
     F_net = 0.5*sqrt(Cl^2 + Cd^2)*rho*area*Vs^2;   % force on rudder [N]
     F_theta = atand(Cl/Cd);                      % angle on rudder [degrees] (atan for rads) - local (oriantated to 90deg of coursw angle)
     
-    
     F_surge = -F_net*cosd(F_theta-S_theta);                    % surge force on ship [N] - global (x co-ordinates)
     F_sway = F_net*sind(F_theta-S_theta);                     % sway force on ship [N] - global (y co-ordinates)
     
@@ -129,6 +129,8 @@ function Output(block)
     Thrust_surge = Thrust*cos(psi);      % [N]
     Thrust_sway = Thrust*sin(psi);       % [N]
     control = [(F_surge+Thrust_surge);(F_sway+Thrust_sway);T_roll;T_yaw];            % [surge,sway,roll,yaw]   
+%     disp('rudder');
+%     disp(control);
     
     % Output the force applied to the ship:
     block.OutputPort(1).Data = control;

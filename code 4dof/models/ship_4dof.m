@@ -38,7 +38,7 @@ function setup(block)
     block.NumContStates = 8;                     % 8 continous states - pos change to 3
     
     % Define the number of parameters:
-    block.NumDialogPrms = 9;                     % number of parameters the s fucntion accepts
+    block.NumDialogPrms = 8;                     % number of parameters the s fucntion accepts
 
     % Set block sample time to continuous:
     block.SampleTimes = [0,0];
@@ -66,22 +66,22 @@ end
 %% Initialisitation:
 function InitialConditions(block)                       % inital  conditions
     % Initialise the continuous states:
-    block.ContStates.Data = block.DialogPrm(9).Data;    % initial conditions
+    block.ContStates.Data = block.DialogPrm(8).Data;    % initial conditions
     % Initialise the dynamic work vector:
-    cos_psi = block.DialogPrm(9).Data(3);
-    sin_psi = block.DialogPrm(9).Data(3);
-    cos_phi = block.DialogPrm(9).Data(3);
+    cos_psi = block.DialogPrm(8).Data(3);
+    sin_psi = block.DialogPrm(8).Data(3);
+    cos_phi = block.DialogPrm(8).Data(3);
 %     J = [cos_psi,sin_psi,0;-sin_psi,cos_psi,0;0,0,1];       
     R = [cos_psi, -cos_phi*sin_psi; sin_psi, cos_phi*cos_psi]; %phi & psi (2.18), theta = 0;
     % R dimensions 2x2, T dimensions 2x2 - x, y, phi, psi
     % Rotational transformation matrix:
     T = [1, 0; 0, cos_phi];
     J = [R,zeros(2,2);zeros(2,2),T];
-    block.Dwork(1).Data = J*block.DialogPrm(9).Data(1:4); %initial conditions
+    block.Dwork(1).Data = J*block.DialogPrm(8).Data(1:4); %initial conditions
 end
 
 %% Output the continuous states:
-function Output(block)   
+function Output(block)
     % Output the continuous states:
     block.OutputPort(1).Data = block.ContStates.Data;
     % Output the inertial velocity:
@@ -92,14 +92,14 @@ end
 % dx/dt = f(x);
 function Derivative(block)
     % Extract the input parameters:
-    prp  = block.DialogPrm(1).Data;     %propeller data
-    act  = block.DialogPrm(2).Data;     %actuator data
-    rbd  = block.DialogPrm(3).Data;     %ridgied body data
-    X    = block.DialogPrm(4).Data;
-    Y    = block.DialogPrm(5).Data;
-    N    = block.DialogPrm(6).Data;
-    K    = block.DialogPrm(7).Data;
-    Minv = block.DialogPrm(8).Data;
+%     prp  = block.DialogPrm(1).Data;     %propeller data
+    act  = block.DialogPrm(1).Data;     %actuator data
+    rbd  = block.DialogPrm(2).Data;     %ridgied body data
+    X    = block.DialogPrm(3).Data;
+    Y    = block.DialogPrm(4).Data;
+    N    = block.DialogPrm(5).Data;
+    K    = block.DialogPrm(6).Data;
+    Minv = block.DialogPrm(7).Data;
     
     % Extract the input vector:
     in = block.InputPort(1).Data;
@@ -185,7 +185,7 @@ function Derivative(block)
     % Compute the right-hand side of the velocity derivative vector: 
     % [du/dt;dw/dt;dq/dt] = f_2(t);                                 % in fossen book pg 180
     % Coriolis matrix
-    Crb = [0, 0, m*zg, -m*(xg*r+v); 0, 0, 0, m*u; -m*zg, 0, 0, 0; m*(xg*r+v), -m*u, 0, 0];      % Ridged body coriolis
+    Crb = [0, 0, m*zg*r, -m*(xg*r+v); 0, 0, 0, m*u; -m*zg*r, 0, 0, 0; m*(xg*r+v), -m*u, 0, 0];      % Ridged body coriolis -  should  m*zg be timed by r?
     Ca = [0, 0, 0, Yvd*v; 0, 0, 0, -Xud*u; 0, 0, 0, Yvd*v; -Yvd*v, Xud*u, -Yvd*v, 0];           % Added mass coriolis
     % Gravity? matrix
     G = sym(zeros(4,4));
@@ -204,6 +204,7 @@ function Derivative(block)
     % 4dof equation of motion
     f = -Crb*nu-Ca*nu-D*nu-G*eta + control;  % check sign f=control-...
     dxdt2 = Minv*f;
+%     u
     
     % Compute the right-hand side of the propulsion vector:
     % [dn/dt;du_p/dt] = f3(t);  %%

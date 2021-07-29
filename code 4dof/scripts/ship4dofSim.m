@@ -42,6 +42,14 @@ ics = zeros(8,1);
 % lim.torque = 100;
 % lim.angle  = deg2rad(15);
 
+% LQR K matrix
+% K_gain = [-3.05987952929453e-21,-0.0342276115016287,-0.999998301935798,105.985826133624,0.00456884029400482,-0.00184111780549751,-1.30747787936369,58.1152174358923;...
+%          1.38946463867309e-30,1.08439425840482e-11,2.03746441663701e-14,-2.04164103638497e-07,1.45855467513394e-11,-4.75336023103087e-14,2.15456212592738e-14,1.49489809672734e-09;...
+%          -1.86836097544575e-21,18.4973282418139,-0.00184736911647252,68198.3673044216,-0.214589656603202,0.199266211091638,-0.00241445033372992,3.97304420160200];
+
+load('rorocontrol.mat');
+K_gain = LQR.K_gain;
+
 % Define constant thrust and rudder angle: - change as desired
 Wv = 10;                % Prevailing wind speed [m/s]
 W_theta = 90;           % Prevailing wind angle [currently degrees]
@@ -75,3 +83,4 @@ v = sout.get('logsout').getElement('velocity').Values.Data;
 plotMotions(t,x(:,1:4),v);
 % Plot the AUV's control input:
 % plotControl(t,u(:,1),rad2deg(u(:,2)),x(:,7));
+

@@ -156,3 +156,75 @@ disp(pcdrstern(1,4));
 disp(pcdrstern(1,5));
 disp(pcdrstern(1,6));
 
+%%
+
+ t = (1:50)';
+ X = ones(50,3);
+ X(:,2) = cos((2*pi)/50*t);
+ X(:,3) = sin((2*pi)/50*t);
+ y = 2*cos((2*pi)/50*t-pi/4)+randn(size(t));
+ y = y(:);
+ beta = X\y;
+ yhat = beta(1)+beta(2)*cos((2*pi)/50*t)+beta(3)*sin((2*pi)/50*t);
+ plot(t,y,'b');
+ hold on
+ plot(t,yhat,'r','linewidth',2);
+
+ 
+ %%
+ clc
+ clear
+
+x = [-180.0,-175.8,-170.1,-165.2,-160.0,-150.9,-140.3,-129.6,-120.2,-110.1,-99.7,-90.3,-79.9,-69.2,-59.7,-50.3,-40.2,-30.2,-25.7,-17.5,-15.0,-12.6,-10.5,-8.0,-6.8,-5.6,-0.2,0.2,5.6,6.8,8.0,10.5,12.6,15.0,17.5,25.7,30.2,40.2,50.3,59.7,69.2,79.9,90.3,99.7,110.1,120.2,129.6,140.3,150.9,160.0,165.2,170.1,175.8,180.0];
+y = [0.464,1.023,1.235,1.046,1.122,1.410,1.471,1.290,0.867,0.565,0.279,-0.038,-0.332,-0.657,-1.034,-1.412,-1.509,-1.426,-1.259,-1.010,-0.987,-1.040,-1.100,-1.085,-1.032,-0.896,-0.185,0.185,0.896,1.032,1.085,1.100,1.040,0.987,1.010,1.259,1.426,1.509,1.412,1.034,0.657,0.332,0.038,-0.279,-0.565,-0.867,-1.290,-1.471,-1.410,-1.122,-1.046,-1.235,-1.023,-0.464];
+yu = max(y);
+yl = min(y);
+yr = (yu-yl);                               % Range of ‘y’
+yz = y-yu+(yr/2);
+zx = x(yz(:) .* circshift(yz(:),[1 0]) <= 0);     % Find zero-crossings
+per = 2*mean(diff(zx));                     % Estimate period
+ym = mean(y);                               % Estimate offset
+fit = @(b,x)  b(1).*(sin(2*pi*x./b(2) + 2*pi/b(3))) + b(4);    % Function to fit
+fcn = @(b) sum((fit(b,x) - y).^2);                              % Least-Squares cost function
+s = fminsearch(fcn, [yr;  per;  -1;  ym])                       % Minimise Least-Squares
+xp = linspace(min(x),max(x));
+figure(1)
+plot(x,y,'b',  xp,fit(s,xp), 'r')
+grid
+
+%%
+ clc
+ clear
+
+x = [-175.5,-170.1,-160.6,-165.4,-150.5,-140.1,-130.3,-120.1,-110.3,-100.4,-90.0,-70.2,-60.3,-50.2,-39.7,-30.0,-24.9,-20.1,-17.4,-15.0,-12.6,-10.2,-7.8,-5.6,-1.9,1.9,5.6,7.8,10.2,12.6,15.0,17.4,20.1,24.9,30.0,39.7,50.2,60.3,70.2,90.0,100.4,110.3,120.1,130.3,140.1,150.5,160.6,165.4,170.1,175.5];
+y = [0.039,0.179,0.407,0.300,0.836,1.311,1.652,1.613,1.760,1.881,1.915,1.721,1.735,1.602,1.201,0.800,0.566,0.439,0.372,0.326,0.272,0.172,0.078,0.032,0.025,0.025,0.032,0.078,0.172,0.272,0.326,0.372,0.439,0.566,0.800,1.201,1.602,1.735,1.721,1.915,1.881,1.760,1.613,1.652,1.311,0.836,0.407,0.300,0.179,0.039];
+yu = max(y);
+yl = min(y);
+yr = (yu-yl);                               % Range of ‘y’
+yz = y-yu+(yr/2);
+zx = x(yz(:) .* circshift(yz(:),[1 0]) <= 0);     % Find zero-crossings
+per = 2*mean(diff(zx));                     % Estimate period
+ym = mean(y);                               % Estimate offset
+fit = @(b,x)  b(1).*(sin(2*pi*x./b(2) + 2*pi/b(3))) + b(4);    % Function to fit
+fcn = @(b) sum((fit(b,x) - y).^2);                              % Least-Squares cost function
+s = fminsearch(fcn, [yr;  per;  -1;  ym]);                       % Minimise Least-Squares
+xp = linspace(min(x),max(x));
+figure(1);
+plot(x,y,'b',  xp,fit(s,xp), 'r');
+grid
+
+%%
+
+x = [7.38, 5.86, 2.46, 6.66, 0.83, 6.26, 6.61, 7.29, 8.91, 9.82];
+y = [11.89, 2.01, 4.54, 7.26, 1.61, 3.99, 7.16, 11.17, 10.44, 1.97];
+z=x.^2/3; w=x.*sin(x);  % define transformed variables in x
+A=[x.' z.' w.'];        % build system matrix
+b=A\y.'                 % solve the system
+plot(x,y,'*')
+xh=[1:10]  ;      % define the desired output points
+zh=[xh; xh.^2/3; xh.*sin(xh)];  % and the transformed variable array from them
+yh=b.'*zh         % evaluate the fit at those points
+hold on
+plot(xh,yh,'b-')
+
+

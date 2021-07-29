@@ -23,7 +23,7 @@ function setup(block)
     block.InputPort(1).DirectFeedthrough = true;
     block.InputPort(1).SamplingMode  = 'Sample';
     % Size the input ports correctly:
-    block.InputPort(2).Dimensions    = 3;    % control input vector (ship vector)
+    block.InputPort(2).Dimensions    = 4;    % control input vector (ship vector)
     % Specify whether there is direct feedthrough:
     block.InputPort(2).DirectFeedthrough = true;
     block.InputPort(2).SamplingMode  = 'Sample';
@@ -91,8 +91,9 @@ function Output(block)
     
     u = ship_velocity(1);           % ship velocity x [m/s]
     v = ship_velocity(2);           % ship velocity y [m/s]
-    psi = ship_velocity(3);         % ship yaw angle [rads]
-    
+    phi = ship_velocity(3);         % ship roll angle [rads]
+    psi = ship_velocity(4);         % ship yaw angle [rads]
+        
     Vt = wind_vector(1);           % Prevailing wind speed [m/s]
     W_theta = wind_vector(2);      % Prevailing wind angle [degrees]
     
@@ -113,26 +114,40 @@ function Output(block)
     TWA = 180*sign + S_theta - W_theta;                         % True wind angle [degrees] - local (oriantated to ship course)
     
     Va = sqrt(Vs^2+Vt^2-2*Vs*Vt*cosd(TWA));        % Apparant wind speed [m/s]
-    AWA = asind((Vt/Va)*sind(TWA));               % Apparant wind angle (check) [degrees] - local (oriantated to ship course)
+    AWA = asind((Vt/Va)*sind(TWA));                % Apparant wind angle (check) [degrees] - local (oriantated to ship course)
+    
+    Va_t = Va*sin(0.5*pi()-abs(phi));                % Apparant wind speed horisontally across wing (accounting for ship roll angle)
+%     Va_t = max(Va_t,0);
     
     AOA = AWA + S_theta - rad2deg(psi) - rad2deg(W_delta);
-    Cl1 = interp1(Cl_angle,Cl_data,AOA);     % Coeffent of lift
-    Cd1 = interp1(Cd_angle,Cd_data,AOA);     % Coeffent of drag
+    Cl1 = interp1(Cl_angle,Cl_data,AOA);      % Coeffent of lift
+    Cd1 = interp1(Cd_angle,Cd_data,AOA);      % Coeffent of drag
+%     disp('AOA');
+%     disp(AOA);
+%     disp('Cl1');
+%     disp(Cl1);
+%     disp('Cd1');
+%     disp(Cd1);
     
     % Scale coeffents of drag based on data from Bordogna, G et al., (2018)
-    W_O = AWA + S_theta - rad2deg(psi);    % wind oriantation angle - angle between wind and ship angle
+    W_O = AWA + S_theta - rad2deg(psi);       % wind oriantation angle - angle between wind and ship angle
     Cl_ratio = interp1(wind_oriantation,Cl_ratio,abs(W_O));
     Cd_ratio = interp1(wind_oriantation,Cd_ratio,abs(W_O));
     Cl2 = Cl_ratio*Cl1;                       % calculating 2 sail Cl
     Cd2 = Cd_ratio*Cd1;                       % calculating 2sail Cd
-       
-    F_net = 0.5*sqrt(Cl2^2 + Cd2^2)*rho*area*Va^2;   % force on sail [N]
+%     disp('W_O');
+%     disp(W_O);
+%     disp('Cl_ratio');
+%     disp(Cl_ratio);
+    
+    F_net = 0.5*sqrt(Cl2^2 + Cd2^2)*rho*area*Va_t^2;   % force on sail [N]
     % Prevents Cl2 = 0 causing infinite angles due to v/u
     sign = (0.5-isreal(sqrt(-Cl2)))*2;           %calculate Cl2 sighn
     Cl2 = sign*(abs(Cl2)+0.0001);                % add 0.001 to absolute valie of u
     F_theta = atand(Cd2/Cl2)*sign;                      % angle on sail [degrees] (atan for rads) - local (oriantated to 90deg of AWA)
-    
-       
+%     disp('F_net');
+%     disp(F_net);
+
     AWA+S_theta-90*sign-F_theta;
     F_surge = F_net*cosd(AWA+S_theta-90*sign-F_theta);                    % surge force on ship [N] - global (x co-ordinates)
     F_sway = F_net*sind(AWA+S_theta-90*sign-F_theta);                     % sway force on ship [N] - global (y co-ordinates)
@@ -144,6 +159,8 @@ function Output(block)
     T_yaw = Fas*d;                                    % yaw torque on ship [Nm]
             
     control = [F_surge;F_sway;T_roll;T_yaw];            % [surge,sway,roll,yaw]
+%     disp('wing');
+%     disp(control);
     
     % Output the force applied to the ship:
     block.OutputPort(1).Data = control;
